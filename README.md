@@ -4,7 +4,7 @@ Disk space analysis that tells you what you can delete. SafeTree scans a Windows
 
 It works like WizTree, plus the part WizTree leaves out: whether deleting something is safe, why, and the right way to reclaim the space when plain deletion is the wrong answer.
 
-![SafeTree with demo data](assets/screenshot.png)
+
 
 ## Starting SafeTree
 

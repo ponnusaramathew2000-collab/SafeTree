@@ -1,4 +1,4 @@
-# SafeTree
+# SafeTree 1.0
 
 Disk space analysis that tells you what you can delete. SafeTree scans a Windows drive in seconds, shows where the space went, and marks every file and folder as safe to delete, delete with care, do not delete, your own files or unknown, with the reason. It deletes only what you select, empties Windows' own junk with a one-click Deep clean, and refuses to touch anything Windows or an installed program needs.
 
@@ -10,16 +10,16 @@ It works like WizTree, plus the part WizTree leaves out: whether deleting someth
 
 **Unblock the zip before extracting.** Right-click the downloaded `SafeTree_Portable.zip` → **Properties** → tick **Unblock** → **OK**, then extract. This removes the "downloaded from the internet" mark that makes SmartScreen and Smart App Control treat the files as untrusted. Do this first.
 
-Then double-click **SafeTree.exe** and click **Yes** when Windows asks for administrator rights. Nothing is installed: Python, Qt and the Visual C++ runtime are all inside the exe, so it runs from the desktop, a USB stick or a network share. The first start takes a few seconds while it unpacks.
+Then double-click **SafeTree.exe** and click **Yes** when Windows asks for administrator rights. Nothing is installed and nothing else is needed: everything SafeTree uses is inside the exe, so it runs from the desktop, a USB stick or a network share. The first start takes a few seconds while it unpacks.
 
 **If SmartScreen says "Windows protected your PC"**, choose **More info** → **Run anyway**. SafeTree.exe isn't code-signed, so SmartScreen doesn't recognise it yet.
 
-**If Smart App Control blocks SafeTree.exe** (Windows 11), there is no "run anyway" option for unsigned programs. Either have IT sign the exe once (see below) or run SafeTree from source with Python (see [Running from source](#running-from-source)).
+**If Smart App Control blocks SafeTree.exe** (Windows 11), there is no "run anyway" option for unsigned programs. Have IT sign the exe once (see below).
 
 - Needs Windows 10 (version 1809 or later) or Windows 11, 64-bit.
 - **Administrator rights** give you the fast scan and Deep clean. Without them SafeTree still works, but it walks the folders instead (slower) and can't read some system folders. The title shows **[Run as administrator]** as a reminder, in amber when SafeTree is *not* running as administrator, and a button restarts it with the right permissions.
 - Try the interface without scanning anything: `SafeTree.exe --demo`
-- Some antivirus products quarantine unsigned PyInstaller programs. If that happens, allow SafeTree.exe or run it from source.
+- Some antivirus products quarantine unsigned programs. If that happens, allow SafeTree.exe in the antivirus.
 
 ## Code-signing SafeTree.exe (permanent fix, for IT)
 
@@ -28,8 +28,6 @@ SafeTree.exe is not code-signed, so Smart App Control can block it on a fresh do
 ```
 signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /a SafeTree.exe
 ```
-
-To rebuild the exe from source first, run **build_exe.bat** (it creates `dist\SafeTree.exe`).
 
 ## Colours
 
@@ -102,10 +100,10 @@ How Deep clean stays safe:
 
 ## How SafeTree decides
 
-**Rules.** About 370 rules cover Windows, Program Files, ProgramData, user profiles, browsers (Chrome, Edge, Brave, Vivaldi, Firefox, Opera), chat and media apps, Steam and Epic, GPU shader caches and developer tools (npm, pip, NuGet, Gradle, Maven, conda, WSL, Docker, Hugging Face, Ollama and more). Each rule says which category it gives, why, and, where it applies, the right way to reclaim the space. All rules live in `safetree/rules.py` with the reason for each.
+**Rules.** About 370 rules cover Windows, Program Files, ProgramData, user profiles, browsers (Chrome, Edge, Brave, Vivaldi, Firefox, Opera), chat and media apps, Steam and Epic, GPU shader caches and developer tools (npm, pip, NuGet, Gradle, Maven, conda, WSL, Docker, Hugging Face, Ollama and more). Each rule says which category it gives, why, and, where it applies, the right way to reclaim the space.
 
 - A rule covers its folder and everything inside it until a more specific rule takes over.
-- Generic rules such as `**\node_modules` or `*.dmp` are never allowed to override a protected area.
+- General rules, such as "any node_modules folder" or "any .dmp file", are never allowed to override a protected area.
 - Folders listed in Windows' **Installed apps** (read from the registry) are marked "Installed program: *name*" and protected, with a button to uninstall the program properly instead.
 - A folder Windows didn't create is blue (your files) if it holds no programs, and grey (unknown) if it holds `.exe` or `.dll` files near the top.
 - Memory dumps outside app-data folders are amber, not green, because they may be evidence.
@@ -177,11 +175,11 @@ Images must be raw (dd). E01 and other container formats aren't supported. Readi
 ## What SafeTree changes on your PC
 
 - **No network.** SafeTree never connects to the internet: no telemetry, no update checks, no cloud lookups.
-- **Nothing is installed.** No services, scheduled tasks or startup entries. While it runs, the exe unpacks itself into `%TEMP%\_MEI…` and removes that folder when it closes.
+- **Nothing is installed.** No services, scheduled tasks or startup entries. While it runs, SafeTree unpacks itself into a temporary folder and removes it when it closes.
 - **Window size and divider positions** are saved in the registry under `HKCU\Software\SafeTree\SafeTree`.
 - **Custom rules** are read from `%APPDATA%\SafeTree\custom_rules.json`, only if you create it.
 - **Deep clean** saves its Disk Cleanup profile as `StateFlags0731` values under `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches`, and briefly stops and restarts the Windows Update, BITS and Delivery Optimization services.
-- **Delete the rest at next restart** uses Windows' own pending-delete list (`MoveFileEx`), which Windows clears when it deletes the files.
+- **Delete the rest at next restart** uses Windows' own pending-delete list, which Windows clears when it deletes the files.
 - **Scanning only reads.** The fast scan opens the volume read-only. Only deleting changes the drive, and only after you confirm. (On a live machine, Windows itself may update folder last-access times when any program lists them; use `--report --image` to examine evidence instead.)
 
 ## Safety guards
@@ -194,41 +192,12 @@ Images must be raw (dd). E01 and other container formats aren't supported. Readi
 - Windows warns before anything too big for the Recycle Bin is deleted permanently.
 - SafeTree can't delete its own running files.
 
-## Running from source
+## Known limits
 
-1. Install Python 3.10 or newer from python.org (tick **Add python.exe to PATH**).
-2. In the SafeTree folder, run `pip install -r requirements.txt`
-3. Right-click **SafeTree (run as admin).bat** → **Run as administrator**. (From a Command Prompt: `python -m safetree`, with the same options as SafeTree.exe.)
-
-
-## Tests
-
-```
-python -m unittest discover -s tests
-```
-
-The MFT test runs only on Linux as root with `mkntfs` and `ntfs-3g` installed; it is skipped elsewhere.
-
-## Files
-
-```
-SafeTree.exe                 the program (portable zip)
-custom_rules.example.json    starting point for your own rules
-safetree/
-  scan_mft.py                raw NTFS $MFT reader (fast scan)
-  scan_walk.py               folder walk (fallback)
-  rules.py                   the safety rules
-  classifier.py              applies the rules, delete guards
-  deleter.py                 Recycle Bin / permanent delete, tree update
-  deepclean.py               Deep clean steps
-  winapi.py                  Windows calls (admin, drives, Recycle Bin, services, tools)
-  treemap_layout.py          space map layout
-  gui/                       PySide6 interface
-  cli.py, demo.py            text report, demo data
-tests/
-build_exe.bat                builds dist\SafeTree.exe
-SafeTree (run as admin).bat  runs from source
-```
+- Alternate data streams aren't counted.
+- In folder-walk mode, "on disk" sizes are estimated from the cluster size.
+- OneDrive online-only files correctly show 0 bytes on disk.
+- Before cleaning your system drive for the first time, try a Recycle Bin delete on something unimportant.
 
 ## Change log
 

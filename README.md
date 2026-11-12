@@ -200,14 +200,6 @@ Images must be raw (dd). E01 and other container formats aren't supported. Readi
 2. In the SafeTree folder, run `pip install -r requirements.txt`
 3. Right-click **SafeTree (run as admin).bat** → **Run as administrator**. (From a Command Prompt: `python -m safetree`, with the same options as SafeTree.exe.)
 
-## What was tested, and what wasn't
-
-- **Rule engine:** 77 Windows locations checked, plus the delete guards, installed-program detection and folders Windows didn't create.
-- **MFT parser:** compared against real NTFS volumes created with `mkntfs` (512 B, 4 KB and 64 KB clusters, hard links, a file with 61 hard-link names, sparse and fragmented files, Unicode names, deleted files, 10,000+ records), on Linux and again through Windows file I/O.
-- **Windows code paths**, run with a Windows build of Python under Wine: admin detection, the drive list, the Recycle Bin (including a locked file in the same batch), permanent deletion of paths longer than 260 characters, `%TEMP%` handling, the fallback from MFT scan to folder walk, Deep clean, delete at next restart, window resizing, and the finished `SafeTree.exe` itself (window, scan, text report).
-- **Not testable without real Windows hardware:** reading `\\.\C:` directly on a live system drive, and the UAC prompt. Scan once and try a Recycle Bin delete on something unimportant before cleaning your system drive.
-
-Known limits: alternate data streams aren't counted; in folder-walk mode "on disk" is estimated from the cluster size; OneDrive online-only files correctly show 0 bytes on disk.
 
 ## Tests
 

@@ -1,0 +1,27 @@
+[
+  {
+    "pattern": "{SYS}\\Cases",
+    "category": "personal",
+    "title": "Forensic case data",
+    "group": "Case data",
+    "reason": "Evidence images and exports. Never delete without checking the case is closed and archived.",
+    "contents_only": true
+  },
+  {
+    "pattern": "{L}\\Volatility3Cache",
+    "category": "safe",
+    "title": "Volatility 3 symbol cache",
+    "group": "Developer caches",
+    "reason": "Downloaded symbol tables; Volatility fetches them again when needed.",
+    "contents_only": true
+  },
+  {
+    "pattern": "**\\*.E01",
+    "category": "personal",
+    "title": "EnCase evidence image",
+    "group": "Case data",
+    "reason": "Forensic image - may be the working copy of evidence.",
+    "applies_in": ["unknown", "personal", "caution"],
+    "target": "file"
+  }
+]
